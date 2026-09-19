@@ -17,7 +17,17 @@ jobs:
 
       - uses: docker/setup-buildx-action@v2
 
-      # TODO build and run unit tests
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install and run unit tests
+        run: |
+          for service in flight-service ticket-service bonus-service gateway-service; do
+            echo "== $service =="
+            npm --prefix "$service" install
+            npm --prefix "$service" test
+          done
 
       - name: Build images
         timeout-minutes: 10
@@ -34,9 +44,8 @@ jobs:
       - name: Run API Tests
         uses: matt-ball/newman-action@master
         with:
-          # TODO insert your variant
-          collection: <variant>/postman/collection.json
-          environment: <variant>/postman/environment.json
+          collection: v1/postman/collection.json
+          environment: v1/postman/environment.json
           delayRequest: 100
           reporters: '[ "cli" ]'
 
